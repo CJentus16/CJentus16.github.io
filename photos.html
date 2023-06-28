@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Photos
-description: show some pictures taken by me 
+description: Life is a journey, not a destination
 background: '/img/bg-photos.jpg'
 form: false
 ---
@@ -34,7 +34,6 @@ form: false
         color: #218380;
         
     }
-    
 
 
 </style>
@@ -70,8 +69,6 @@ form: false
     let imageLink = document.querySelector('#imageLink')
     let dateDetails = document.querySelector('#dateDetails')
     let imageDescription = document.querySelector('.imageDescription p')
-    
-    // let imageText 
 
     fetch(endPoint)
         .then(function (response) {
@@ -89,11 +86,13 @@ form: false
                 const alt = item.alt_description;
                 imageDescription.innerHTML = alt.charAt(0).toUpperCase()+alt.slice(1);
             }
-
-           
-            console.log(item);     
-            // console.log(jsonData);
-            console.log(item.alt_description);
+            // fetech the dats using the API
+            // console.log(item);     
+            // // console.log(jsonData);
+            // console.log(item.alt_description);
         })
+        .catch(function(err){
+            console.log("Error:"+ err);
+        });
     
 </script>
