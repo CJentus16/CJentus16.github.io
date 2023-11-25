@@ -1,0 +1,205 @@
+---
+layout: post
+title: "Nginx学习记录"
+subtitle: "一个高性能的HTTP和反向代理web服务器"
+background: '/img/posts/nginx.jpg'
+---
+<md-block>
+    ### Nginx是什么
+
+    Web服务器 解决（C10K） 并发问题
+    
+    - 高并发，最多50000个连接
+    - 高性能，低内存
+    - 热部署…
+    
+    **Nginx 模型**
+    
+    ![Screen Shot 2023-11-25 at 3.22.05 PM.png](/img/Nginx%2062b24b8a4458473ebf234df9fd129454/Screen_Shot_2023-11-25_at_3.22.05_PM.png)
+    
+    - 二个进程
+      - 一个是负责读取配置文件(master)，另一个是负责处理实际请求(worker)
+
+    <br/>  
+    
+    ### Ngnix 常用命令行
+    
+    测试Nginx 配置文件是否有问题 `nginx -t`
+    
+    **查看nginx 是否有启动**  `ps aux | **grep** nginx`
+    
+    `nginx -s -signal`
+    
+    - `stop` 立刻关闭Nginx
+    - `quit` 优雅停止Nginx
+    - `reload` 重制配置文件  * **配置文件修改后都是需要重新加载一下的**
+    - `reopen` 重新打开日志文件
+    
+    查看nginx 信息
+    
+    `brew info nginx` ;    `nginx -V`
+    
+    配置了SHELL命令行
+    
+    - 现在可以通过**code/atom /usr/local/etc/nginx/nginx.conf** 直接打开了文件了
+    - 也可以用**cat** 来查看文件;  vi 来编辑
+    - cmd+shift + p 搜索
+    
+    查端口占有情况   **`lsof -i :端口号码`**
+    
+    - 只有**80端口**可以做到默认不显示端口号
+
+    <br/>
+    
+    ### 配置文件
+    
+    主要分为3大块：全局，events，http块（配置负载均衡，反向代理的位置）
+    
+    - http 块里有包括server （可以理解成虚拟机）
+    - `mime.types` 里面包括了文件的类型，作用就是可以通过文件后缀名来判断文件的类型
+    
+    Nginx 网站根目录默认放在 cd `**/usr/local/var/www**`
+    
+    安装在 `/usr/local/Cellar/nginx/1.25.2`  默认的html文件jia是链接前一个个路径
+    
+    `location` 是通过正则匹配的方法进行匹配的
+    
+    - location / {# 匹配任何请求，因为所有请求都是以”/“开始
+    
+    配置样例如下：
+    
+    ```java
+    location /flv/ {
+            root /data/web;
+            index  index.html index.htm;
+    }
+    ```
+    
+    当 **root** 指令在 location 指令域时，root 设置的是 location 匹配访问路径的上一层目录，样例中被请求文件的实际本地路径为 /data/web/flv/。
+    
+    **`index`**指令定义了在没有指定具体文件名的情况下，Nginx应该搜索的默认文档文件。Nginx将按照指定的顺序在**`root`**目录中查找这些文件，**返回找到的第一个文件**。可以在**`server`**块或**`location`**块中使用。
+    <br/>   <br/>
+
+
+    ### 反向代理和负载均衡
+    
+    **正向代理：代理客户端；**
+    
+    ![Screen Shot 2023-11-25 at 3.56.09 PM.png](/img/Nginx%2062b24b8a4458473ebf234df9fd129454/Screen_Shot_2023-11-25_at_3.56.09_PM.png)
+    
+    - VPN的例子
+      - 使用VPN作为代理服务器, vpn作为客户端代理我们去访问
+    
+    **反向代理：代理服务端**
+    
+    ![Screen Shot 2023-11-25 at 3.58.22 PM.png](/img/Nginx%2062b24b8a4458473ebf234df9fd129454/Screen_Shot_2023-11-25_at_3.58.22_PM.png)
+    
+    - 浏览网页的例子
+      - 我们对网页的请求会被转发到后面的服务器上 【隐藏了真实的服务器IP地址，端口等信息】
+    
+    **演示**
+    
+    后端服务使用Springboot， 然后分别启动spring端口为8080，8081，8082
+    
+    ```java
+    @RequestMapping("/app")
+        public String showPort(HttpServletRequest request) {
+            int port = request.getLocalPort();
+            return "当前端口号: " + port;
+        }
+    ```
+    
+    **修改Nginx的配置文件**
+    
+    ```java
+    // 反向代理哪些服务器, weight 进行调权重
+    upstream backend {
+         ip_hash;
+         server  162.168.1.7:8080 weight =3 ;
+         server  162.168.1.7:8081;
+         server  162.168.1.7:8082;
+    }
+    // proxy_pass 需要保证和前的保持一致
+    location /app {
+         proxy_pass  http://backend;
+    }
+    ```
+    
+    默认是以**轮巡的方式进行代理的** 【8080 →8081→8082→8080….】
+    
+    **常见的负载均衡的例子**
+    
+    - **weight** 权重
+    - **ip_hash** 同一客户的的请求就会被分配到同一个服务器上
+      - 根据客户端的ip地址进行哈希
+    
+      <br/> 
+
+    ### HTTPS 配置
+    
+    - HTTP 默认端口为80, HTTPS默认端口为443
+    - HTTPS 协议需要用到SSL证书
+    
+    使用openssl生成证书生成私钥文件(private key)
+
+    `openssl genrsa -out private.key 2048`
+    
+    根据私钥生成证书签名请求文件(Certificate Signing Request,简称CSR文件) 
+    
+    `openssl req -new -key private.key -out cert.csr`
+    
+    使用私钥对证书申请进行签名从而生成证书文件(pem文件)
+    
+    `openssl x509 -req -in cert.csr -out cacert.pem -signkey private.key`
+    
+    **然后去配置我们的nginx**
+    
+    ```java
+    listen       443 ssl;
+    server_name  localhost;
+    
+    # 证书文件名称
+    ssl_certificate /Users/xxx/Desktop/nginx-test/cacert.pem;
+    
+    # 证书私钥文件名称
+    ssl_certificate_key /Users/xxx/Desktop/nginx-test/private.key;
+    
+    # ssl验证配置
+    ssl_session_timeout   5m; # 缓存有效期
+    
+    # 安全链接可选的加密协议
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.3;
+    
+    # 配置加密套件/加密算法，写法遵循 openssl 标准。
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;
+    
+    # 使用服务器端的首选算法
+     ssl_prefer_server_ciphers on;
+    ```
+    
+    将http的请求重定向到https
+    
+    ```java
+    server{ #修改我们的nginx 配置
+          listen 80;
+          server_name test.net www.test.net;
+          return 301 https://$server_name$request_uri;
+    }
+    ```
+    <br/>
+
+    ### 虚拟主机 (servers)
+    
+    把配置文件放到servers 目录下即可，指定端口，路径
+    
+    ![Screen Shot 2023-11-25 at 8.20.50 PM.png](/img/Nginx%2062b24b8a4458473ebf234df9fd129454/Screen_Shot_2023-11-25_at_8.20.50_PM.png)
+    
+    [参考视频](https://www.bilibili.com/video/BV1mz4y1n7PQ?p=1&vd_source=0db57e0ede5e855e62d98a665b6269a4)
+    <br/><br/>
+
+</md-block>
+
+<script type="module" src="https://md-block.verou.me/md-block.js"></script>
+
+
+<!--  bundle exec jekyll serve -->
