@@ -1,0 +1,86 @@
+---
+layout: post
+title: "Servlet学习笔记（1）"
+subtitle: "在Tomcat服务器上部署网页"
+background: '/img/posts/nginx.jpg'
+---
+
+<md-block>
+    **如何在Tomcat上部署项目**
+
+- 在**webapps** 中建立文件夹（项目应用），比如：myweb
+- 创建**WEB-INF**文件夹，用于存放项目的核心内容
+    - 创建**classes**，用于存放.class文件
+    - 创建**lib**，用于存放jar文件
+    - 创建**web.xml**，项目配置文件（到ROOT项目下的WEB-INF复制即可)
+
+**部署一个静态的网页试试看**
+
+- 把网页**hello.html**复制到myweb文件夹中，与WEB-INF在同级目录 就可以访问了
+
+![Screen Shot 2023-12-08 at 3.18.10 PM.png](/img/Untitled%20781afdc1e67c4976879fdb528d55d508/Screen_Shot_2023-12-08_at_3.18.10_PM.png)
+![Screen Shot 2023-12-08 at 3.19.12 PM.png](/img/Untitled%20781afdc1e67c4976879fdb528d55d508/Screen_Shot_2023-12-08_at_3.19.12_PM.png)
+
+**响应流程图**
+<img src ="/img/Untitled%20781afdc1e67c4976879fdb528d55d508/Screen_Shot_2023-12-07_at_6.17.24_PM.png" width="100%">
+
+
+### Servelt
+
+- Servelt applet的简称，服务器端的程序
+- 动态网页技术
+- 作用
+    - 接受客户端请求，完成操作
+    - 动态生成网络
+    - 包括操作结果的动态网页响应给客户端
+
+**如何部署servlet**
+
+- 首先创建一个类实现Servelt接口，实现所有方法
+    - `init`, `getServletConfig`,`service`,`getServletInfo`,`destroy()`
+    - javax.servelt.Servelt/Config/Exception/Request/Response
+    - 然后可以在service() 方法 print 一些东西
+- 将编译好的字节码文件放在WEB-INF 的**classes** 文件夹里
+    - `javac MyServelt.java`
+- 对其webxml进行配置
+    
+
+<pre>
+    <code>
+&lt;servlet&gt;
+       &lt;servlet-name&gt;test&lt;/servlet-name&gt;
+       &lt;servlet-class&gt;MyServlet&lt;/servlet-class&gt; 
+&lt;/servlet&gt;
+    
+    &lt;servlet-mapping&gt;
+       &lt;servlet-name&gt;test&lt;/servlet-name&gt;
+       &lt;url-pattern&gt;/myServlet&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+</code>
+</pre>
+    
+
+整体结构大概是这样的
+
+![Screen Shot 2023-12-08 at 3.22.40 PM.png](/img/Untitled%20781afdc1e67c4976879fdb528d55d508/Screen_Shot_2023-12-08_at_3.22.40_PM.png)
+
+- 当我们试着访问：[http://localhost:6060/myweb/myServelt](http://localhost:6060/myweb/myServelt)是空白的，但是能够在控制台看到输出的信息
+
+**看不到打印出的信息**
+
+- 使用终端执行 `sudo**./catalina.sh run**` 命令来启动 Tomcat，并查看控制台输出：
+- `control + c` 来结束服务
+</md-block>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/panda-syntax-dark.css">
+
+<script type="module" src="https://md-block.verou.me/md-block.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+<!--  bundle exec jekyll serve -->
+<style>
+    pre{
+        background-color: #f0f0f0;
+    }
+</style>
