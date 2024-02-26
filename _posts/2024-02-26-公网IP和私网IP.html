@@ -14,24 +14,29 @@ background: '/img/posts/nginx.jpg'
     
     - 这是因为我们处在同一个局域网下
     
-    ![Screen Shot 2024-02-26 at 10.43.11 AM](/img/ip_addr/Screen Shot 2024-02-26 at 10.43.11 AM.png)
+   <img src= "/img/ip_addr/Screen Shot 2024-02-26 at 10.43.11 AM.png">
+   <br>
     
     然后我们访问的过程如下
     
     - **局域网设备访问互联网 -> 路由器 （NAT 转换）-> 运营商 -> 目标**
     - 我们可以通过```traceroute ```命令来查看详细过程
     
+    <br>
     而局域网下的IP是通过路由器上的DHCP服务器进行分发的
     
     - 例子，我路由器ip是192.168.1.1, 我手机的IP地址是192.168.1.4
     
     <img src="/img/ip_addr/Screen Shot 2024-02-26 at 10.49.34 AM.png" alt="Screen Shot 2024-02-26 at 10.49.34 AM" style="zoom:30%;float:middle;" />
+    <br>
     
-    如何可以让外网设备访问呢？
+    **如何可以让外网设备访问呢？**
     
     - **内网穿透**
     
     - ~~公网IP~~ 【运营商一般都不会给公网ip】
+
+    <br>
     
     这里使用cploar 来进行内网穿透，我们的目标是把虚拟机的ip给暴露在公网上。具体的操作可以参考这篇[文章](https://www.cpolar.com/blog/cpolar-quick-start-tutorial-centos-series).
     
