@@ -1,0 +1,65 @@
+---
+layout: post
+title: "公网IP和私网IP"
+subtitle: "什么是公网IP，什么又是私网IP呢？"
+background: '/img/posts/nginx.jpg'
+---
+
+<md-block>
+    最近在巩固MySQL的知识，有一个需求要求我们去连接服务器上的MySQL, 捣鼓了好久终于可以连接上。然后我就很好奇，如果我们可以连接服务器的话，我们是不是**同样连接到别人电脑上的MySQL呢**
+
+    后面了解到，没有办法直接连接，需要进行一些设置才可以
+    
+    问题1. 为什么本地的设备可以连接，而外网的设备不行呢？
+    
+    - 这是因为我们处在同一个局域网下
+    
+    ![Screen Shot 2024-02-26 at 10.43.11 AM](/img/ip_addr/Screen Shot 2024-02-26 at 10.43.11 AM.png)
+    
+    然后我们访问的过程如下
+    
+    - **局域网设备访问互联网 -> 路由器 （NAT 转换）-> 运营商 -> 目标**
+    - 我们可以通过```traceroute ```命令来查看详细过程
+    
+    而局域网下的IP是通过路由器上的DHCP服务器进行分发的
+    
+    - 例子，我路由器ip是192.168.1.1, 我手机的IP地址是192.168.1.4
+    
+    <img src="/img/ip_addr/Screen Shot 2024-02-26 at 10.49.34 AM.png" alt="Screen Shot 2024-02-26 at 10.49.34 AM" style="zoom:30%;float:middle;" />
+    
+    如何可以让外网设备访问呢？
+    
+    - **内网穿透**
+    
+    - ~~公网IP~~ 【运营商一般都不会给公网ip】
+    
+    这里使用cploar 来进行内网穿透，我们的目标是把虚拟机的ip给暴露在公网上。具体的操作可以参考这篇[文章](https://www.cpolar.com/blog/cpolar-quick-start-tutorial-centos-series).
+    
+    一些比较重要的指令
+    
+    - ```sudo systemctl start cpolar``` 启动cploar 服务
+    - ```sudo systemctl status cpolar```查看服务状态
+    
+    在我的情况下，公网的ip为2.t cp.vip.cpolar.cn，端口号为11691，然后我们就可以通过ssh 来进行连接。注意，我们虚拟机本地的22端口到了公网被映射到了23075端口
+    
+    - 连接命令为：```ssh -p 端口号 用户名@公网地址 ```
+    
+    如果我们想在本地局域网内，访问到虚拟机，操作也是相似的。我们通过设置端口映射来实现！
+    
+    **示意图如下：**
+    
+    ![ip](/img/ip_addr/ip.png)
+</md-block>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/panda-syntax-dark.css">
+
+<script type="module" src="https://md-block.verou.me/md-block.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+<!--  bundle exec jekyll serve -->
+<style>
+    pre{
+        background-color: #f0f0f0;
+    }
+</style>
